@@ -122,7 +122,11 @@ def parse_dicts(input):
 		traffic_time.append(traffic)
 
 		#get average speeds per link - for now
-		speed = sum(leg['speed_limit'])/len(leg['speed_limit'])
+		if len(leg['speed_limit'])== 0:
+			speed = speed_limit[-1]
+		else:
+			speed = sum(leg['speed_limit'])/len(leg['speed_limit'])
+
 		speed_limit.append(speed)
 
 		#durations - length per leg
@@ -289,33 +293,33 @@ def get_training_input(test):
 
 	return sped_up_vector
 
-def get_delta(processed_bmw):
+def get_delta(delta_input, i):
 
 	#calculate expectations
 	#here they are hardcoded
-	delta = []
-
+	delta_out = []
 	#get normalized delta: observed - expectations (off historical data). here, randomly generated w/ preset perturbations
-	for i in range(len(processed_bmw)):
-		 delta_curr = {'accel': random.normalvariate(0, 0.1) + delta_dev[i]['accel'],
-		 'brakes': random.normalvariate(0, 0.1) + delta_dev[i]['brakes'],
-		 'lane': random.normalvariate(0, 0.1) + delta_dev[i]['lane'],
-		 'rain': random.normalvariate(0, 0.1) + delta_dev[i]['rain'],
-		 'rpm': random.normalvariate(0, 0.1) + delta_dev[i]['rpm'],
-		 'speed': random.normalvariate(0, 0.1) + delta_dev[i]['speed'],
-		 'steer_change': random.normalvariate(0, 0.1) + delta_dev[i]['steer_change']}
-		 delta.append(delta_curr)
+	 
+	delta_curr = {'accel': random.normalvariate(0, 0.1) + delta_dev[i]['accel'],
+	'brakes': random.normalvariate(0, 0.1) + delta_dev[i]['brakes'],
+	'lane': random.normalvariate(0, 0.1) + delta_dev[i]['lane'],
+	'rain': random.normalvariate(0, 0.1) + delta_dev[i]['rain'],
+	'rpm': random.normalvariate(0, 0.1) + delta_dev[i]['rpm'],
+	'speed': random.normalvariate(0, 0.1) + delta_dev[i]['speed'],
+	'steer_change': random.normalvariate(0, 0.1) + delta_dev[i]['steer_change']}
 
-	return delta
+	return delta_curr
 
 #at each slice of time, pass in a delta vector. then detect events for each event type
-def transform_delta_to_event(currTime, deltaSlice, currTriggerState, states_remaining):
+def transform_delta_to_event(currTime, inputDelta, currTriggerState, states_remaining):
 
 	#for each variable, transform delta into a score incorporating the baseline
 
 	#alpha is the weight to delta. 1-alpha the weight to the hcl baseline. get the aggregate score.
 	alpha = 0.75
 
+	deltaSlice = get_delta(inputDelta, currTime)
+	
 	scores = {}
 
 	if(states_remaining > 0):
