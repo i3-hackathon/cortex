@@ -14,3 +14,8 @@ Note: When using Vagrant, to log into the box run `vagrant ssh -- -X`
 ## APIs Used
 1. BMW Car Data (http://data.hackthedrive.com/)
 2. Here (http://developer.here.com)
+
+### Errors
+
+`TclError: couldn't connect to display "localhost:10.0"`
+Quit the Vagrant shell and log back in using `vagrant ssh -- -X`
