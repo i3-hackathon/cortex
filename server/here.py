@@ -80,7 +80,10 @@ class Here:
                     'traffic_time': int(maneuver.get('trafficTime')),
                     'base_time': int(maneuver.get('baseTime')),
                     'freeway_exit': str(maneuver.get('freewayExit')),
-                    '_id': str(maneuver.get('id'))}
+                    '_id': str(maneuver.get('id')),
+                    'lat': float(maneuver.get('position', {}).get('latitude', 0)),
+                    'lon': float(maneuver.get('position', {}).get('longitude', 0)),
+                    }
 
                 # Add the speed from list of links
                 all_speeds = set([l['speed_limit'] for l in link_list.get(segment['_id'], [])])
@@ -100,4 +103,6 @@ class Here:
             [37.788297, -122.401527],
             [37.786214, -122.398987],
             [37.783356, -122.402695],
-            [37.593055, -122.366036]])
+            [37.593055, -122.366036],
+            [37.598469, -122.387553],
+            [37.598469, -122.187553]])
