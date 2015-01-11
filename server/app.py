@@ -1,5 +1,4 @@
 import os
-import time
 
 from ai import hcl_compute
 from ai import processed_route_10sinterval as demo_data
@@ -54,11 +53,11 @@ def oauth2_authorize(access_token):
         return redirect('/')
 
 
-
 # Demo
 demo_data_point = 0
 demo_trigger_state = 0
 demo_states_remaining = 1
+
 
 @app.route('/environment')
 @crossdomain(origin='*')
@@ -76,16 +75,14 @@ def get_environment():
     global demo_data_point, demo_trigger_state, demo_states_remaining
 
     demo_data_slice = demo_data.data[demo_data_point]
+
+    trigger, context, states_remaining = hcl_compute.transform_delta_to_event(demo_data_point, demo_data_slice, demo_trigger_state, demo_states_remaining)
+
     demo_data_point = (demo_data_point + 1) % len(demo_data.data)
-
-    trigger, content, states_remaining = hcl_compute.transform_delta_to_event(None, demo_data_slice, demo_trigger_state, demo_states_remaining)
-
     demo_trigger_state = trigger
     demo_states_remaining = states_remaining
 
-
     return jsonify({'result': demo_data_slice, 'context': context})
-
 
 
 @app.route('/directions/<coordinates>')
