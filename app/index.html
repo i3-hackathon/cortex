@@ -3,8 +3,7 @@
     <head>
       <link type="text/css" rel="stylesheet" href="dist/css/application.css"  media="screen,projection"/>
       <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, user-scalable=0">
-      <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAY-nH8lGw66dRFiZAlqLVtiaktdKMeTxY"></script>
+      <script src="http://mbostock.github.com/d3/d3.v2.js"></script>
     </head>
 
     <body>
@@ -49,9 +48,7 @@
       </div>
 
       <div class="blackout">
-        <div class="btn-container">
-          <a class="waves-effect waves-light btn">End Trip</a>
-        </div>
+        <div id="graph1" class="aGraph" style="width:360px; height:500px;"></div>
       </div>
 
       <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -67,7 +64,8 @@
                               navigator.mozVibrate || 
                               navigator.msVibrate;
 
-          $('#address-lookup').submit(function(){
+          $('#address-lookup').submit(function(e){
+            e.preventDefault();
             document.activeElement.blur();
             var uri = $('#lookup-input').val();
             var res = encodeURI(uri);
@@ -77,7 +75,7 @@
               $("#mapbox").attr("src", "https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg#17/" + lat + "/" + lon);
             });
 
-            window.setTimeout(function() { blackOut() }, 2500);
+            window.setTimeout(function() { blackOut() }, 1500);
           });
 
           function blackOut() {
@@ -85,9 +83,7 @@
               url: "http://crispybacon.ngrok.com/directions/37.788297,-122.401527;37.786214,-122.398987;37.783356,-122.402695;37.593055,-122.366036&callback=?",
               contentType: "application/json",
               dataType: "json",
-              success: function(data) {
-
-              }
+              success: function(data) {}
             });
 
             $('.blackout').fadeIn();
@@ -95,18 +91,70 @@
           }
 
           var poll = function() {
+            displayGraph("#graph1", 360, 500, "basis", true, 1000, 1000);
+
             setTimeout(function() {
-              console.log('polling');
               $.ajax({ url: "http://crispybacon.ngrok.com/environment",success: function(data) {
-                  console.log('data: ' + data);
                   if (data.context.length >= 1 && data.context[0] != "already_on")  {
-                    // var u = new SpeechSynthesisUtterance('Use your ' + data.context + 'idiot.');
+                    // var u = new SpeechSynthesisUtterance('Use caution ahead.');
                     // speechSynthesis.speak(u);
                     navigator.vibrate([200, 100, 200, 100, 200]);
                   }
-              }, dataType: "json", complete: poll });
-            }, 1000)
+              }, dataType: "json"});
+            }, 1000);
           };
+
+          function displayGraph(id, width, height, interpolation, animate, updateDelay, transitionDelay) {
+          // create an SVG element inside the #graph div that fills 100% of the div
+          var graph = d3.select(id).append("svg:svg").attr("width", "90%").attr("height", "100%");
+
+          // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
+          var data = [2.419465094, 3.509783816, 4.866273605, 7.514080373, 13.85301613, 11.83978281, 11.35747269, 11.29727392, 17.0112778, 17.27338236, 22.23792451, 34.659197, 27.34826239, 23.20665365, 19.91032865, 16.21121741, 10.04699836, 5.35810532, 3.289466522, 2.255147124, 1.737987424, 1.479407575, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.411693273, 1.381334278, 1.320616288, 1.199180307, 0.956308346];
+
+          var x = d3.scale.linear().domain([0, 30]).range([-300, width]); 
+          var y = d3.scale.linear().domain([0, 40]).range([height, 0]);
+          var line = d3.svg.line()
+            .x(function(d,i) { 
+              return x(i); 
+            })
+            .y(function(d) { 
+              return y(d); 
+            })
+            .interpolate(interpolation)
+        
+            // graph.append("svg:path").attr("d", line(data));
+            graph.selectAll("path").data([data]).enter().append("svg:path").attr("d", line);
+            
+            
+            function redrawWithAnimation() {
+              // update with animation
+              graph.selectAll("path")
+                .data([data]) // set the new data
+                .attr("transform", "translate(" + x(1) + ")") // set the transform to the right by x(1) pixels (6 for the scale we've set) to hide the new value
+                .attr("d", line) // apply the new data values ... but the new value is hidden at this point off the right of the canvas
+                .transition() // start a transition to bring the new value into view
+                .ease("linear")
+                .duration(transitionDelay)
+                .attr("transform", "translate(" + x(0) + ")");
+            }
+            
+            function redrawWithoutAnimation() {
+              // static update without animation
+              graph.selectAll("path")
+                .data([data]) // set the new data
+                .attr("d", line); // apply the new data values
+            }
+            
+            setInterval(function() {
+               var v = data.shift(); // remove the first element of the array
+               data.push(v); // add a new element to the array (we're just taking the number we just shifted off the front and appending to the end)
+               if(animate) {
+                 redrawWithAnimation();
+               } else {
+                   redrawWithoutAnimation();
+               }
+            }, updateDelay);
+          }
         });
       </script>
 

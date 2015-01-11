@@ -24,18 +24,17 @@ body {
   position: absolute;
   top: 0; 
   left: 0;
-  height: 100vh;
-  width: 100vw;
-  background: rgba(0, 0, 0, 0.8);
+  height: 100%;
+  width: 100%;
+  background: #3C3C3C;
+  padding-top: 70px;
 
-  .btn-container {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-  }
-
-  .btn {
-    @include vertical-align();
+  .aGraph {
+    path {
+      stroke: white;
+      stroke-width: 5px;
+      fill: none;
+    }
   }
 }
 
