@@ -27,9 +27,9 @@ for i in range(15):
  'speed': 0.0,
  'steer_change': 0.0})
 	#perturbations - these were observed in the data
-	delta_dev[5]['brakes'] = 0.7
-	delta_dev[4]['brakes'] = 0.7
-	delta_dev[5]['steer_change'] = 0.8
+delta_dev[5]['brakes'] = 0.7
+delta_dev[4]['brakes'] = 0.7
+delta_dev[5]['steer_change'] = 0.8
 
 #input is list of dicts
 def compute_hcl(input):
@@ -166,7 +166,7 @@ def exponential_smoothing(input):
 	
 	#EXPONENTIAL SMOOTHING
 	#discount factor alpha
-	alpha_one = 0.5
+	alpha = 0.5
 	#sliding window span
 	span = 5
 	#exponential discounting function is discount = 0.5 ^ n where n is the steps away from center. max steps = span = 5
@@ -247,7 +247,7 @@ def precompute_hcl(input):
 #IRL, compute based on history of rides
 #here, return a preset expectation
 def expectation_route():
-	
+	pass
 
 #just for training
 def get_training_input(test):

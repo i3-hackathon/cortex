@@ -1,6 +1,7 @@
 import os
 import time
 
+from ai import hcl_compute
 from bmw import BMW
 from flask import Flask, jsonify, redirect
 from here import Here
@@ -50,13 +51,15 @@ def oauth2_authorize(access_token):
 
 @app.route('/environment')
 def get_environment():
+    ''' This endpoint will get pinged by the mobile app every second in order
+        to figure out the driving status. In a non-hackathon environment this
+        would be asynchronous with websockets. '''
 
-    log = []
-    for t in xrange(250):
-        log.append(bmw.get_environment())
-        time.sleep(1)
+    environment = bmw.get_environment()
 
-    return jsonify({'results': log})
+
+
+    return jsonify({'results': bmw.get_environment()})
 
 
 @app.route('/directions/<coordinates>')
@@ -70,12 +73,27 @@ def get_directions(coordinates):
     for coordinate_pair in coordinates.split(';'):
         all_coordinates.append(map(float, coordinate_pair.split(',')))
 
-    return jsonify({'result': here.get_directions(all_coordinates)})
+    directions = here.get_directions(all_coordinates)
+
+    # "timestamps" are the markers between safe and unsafe zones
+    # "unsafe" is the safety of every zone (0 1 0 1 ...)
+    # "hcl_vector" shows the hcl score for every point in time
+    # "parse_interval" number of seconds in each point of the hcl_vector
+    timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
+
+    return jsonify({'result': directions})
 
 
 @app.route('/bmw')
 def get_bmw_data():
-    return jsonify({'result': here.get_directions_bmw_data()})
+    ''' Demo route. '''
+
+    directions = here.get_directions_bmw_data()
+    timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
+
+    import code; code.interact(local=dict(globals(), **locals()))
+
+    return jsonify({'result': directions})
 
 
 if __name__ == '__main__':
