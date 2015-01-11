@@ -315,8 +315,12 @@ def get_delta(delta_input, i):
 
 	return delta_curr
 
+2s
+
+25
+
 #at each slice of time, pass in a delta vector. then detect events for each event type
-def transform_delta_to_event(currTime, inputDelta, currTriggerState, states_remaining):
+def transform_delta_to_event(demoDataPoint, inputDelta, currTriggerState, states_remaining):
 
 	#for each variable, transform delta into a score incorporating the baseline
 
@@ -324,7 +328,7 @@ def transform_delta_to_event(currTime, inputDelta, currTriggerState, states_rema
 	alpha = 0.75
 
 	deltaSlice = get_delta(inputDelta, currTime)
-	
+
 	scores = {}
 
 	if(states_remaining > 0):
@@ -334,7 +338,7 @@ def transform_delta_to_event(currTime, inputDelta, currTriggerState, states_rema
 
 	trigger = False
 	for key in deltaSlice.keys():
-		score = alpha * deltaSlice[key] + (1-alpha) * (hcl_vector[int(round(currTime * speed_up_factor / parse_interval))])/max(hcl_vector) 
+		score = alpha * deltaSlice[key] + (1-alpha) * (hcl_vector[int(round(demoDataPoint * 5 / parse_interval))])/max(hcl_vector) 
 		scores[key] = score
 
 		#from scores to events
