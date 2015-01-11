@@ -15,8 +15,8 @@ def home():
     return ''
 
 
-@app.route('/directions')
-def get_directions():
+@app.route('/bmw')
+def get_bmw_data():
     return jsonify({'result': here.get_directions_bmw_data()})
 
 if __name__ == '__main__':
