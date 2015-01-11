@@ -352,6 +352,11 @@ def transform_delta_to_event(demoDataPoint, inputDelta, currTriggerState, states
 			else:
 				context.append(key)
 
+	sumScores = 0
+	for score in scores.items():
+		sumScores += score[1]
+	totalScore /= len(scores)
+
 	if(trigger == False and states_remaining > 0):
 		states_remaining = states_remaining - 1
 		return True, context, states_remaining
