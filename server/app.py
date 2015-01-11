@@ -1,19 +1,54 @@
 import os
 
-from flask import Flask, jsonify
+from bmw import BMW
+from flask import Flask, jsonify, redirect
 from here import Here
+
 
 debug_mode = True
 app_name = 'Shift'
 
 app = Flask(__name__, static_folder='../static', static_url_path='')
-here = Here(app_id='6QnZmVcfu8HXl5O4D11u', app_code='4KTi0jcgtuuMXlCT2SvPUQ')
 
+domain = 'http://crispybacon.ngrok.com'
+here = Here(app_id='6QnZmVcfu8HXl5O4D11u', app_code='4KTi0jcgtuuMXlCT2SvPUQ')
+bmw = BMW(app_id='2d8a7423-5ea7-4053-a704-0d69dc4e13a9',
+          app_secret='e0c2dc59-281a-4075-ad96-47d145479dc6',
+          access_token='edd44c7f-b6c1-4c8c-80de-00aa1644071d',
+          redirect_uri='%s/authorize' % (domain))
 
 @app.route('/')
 def home():
     return ''
 
+
+@app.route('/oauth-token')
+def oauth_token():
+    return redirect(bmw.oauth_authorize_url())
+
+
+@app.route('/authorize', defaults={'access_token': None})
+@app.route('/authorize/<access_token>')
+def oauth2_authorize(access_token):
+    if access_token is None:
+        return '''
+        <script type="text/javascript">
+            // Retrieve the token from the URL
+            token = window.location.href.split("access_token=")[1];
+            token = token.split("&")[0];
+
+            // Redirect to set the token
+            window.location = "/authorize/" + token
+        </script>
+        '''
+    else:
+        bmw.access_token = access_token
+        return redirect('/')
+
+
+@app.route('/environment')
+def get_environment():
+    return jsonify({'result': bmw.get_environment()})
 
 @app.route('/directions/<coordinates>')
 def get_directions(coordinates):
