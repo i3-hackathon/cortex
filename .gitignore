@@ -3,5 +3,3 @@
 .vagrant
 hcl.png
 ngrok.sh
-app/dist/
-app/node_modules/
