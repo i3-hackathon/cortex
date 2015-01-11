@@ -1,4 +1,4 @@
-[{'accel': False,
+data = [{'accel': False,
   'brakes': -2.0,
   'lane': False,
   'rain': 0.0,

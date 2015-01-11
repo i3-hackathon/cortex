@@ -78,9 +78,9 @@ class BMW:
         }
 
         # Calculate accelerometer
-        accel_x = status.get('Accelerometer', {}).get('X', 0)
-        accel_y = status.get('Accelerometer', {}).get('Y', 0)
-        accel_z = status.get('Accelerometer', {}).get('Z', 0)
+        accel_x = status.get('Accelerometer', {}).get('X', 0) or 0
+        accel_y = status.get('Accelerometer', {}).get('Y', 0) or 0
+        accel_z = status.get('Accelerometer', {}).get('Z', 0) or 0
 
         environment['accelerometer'] = math.sqrt((accel_x ** 2) + (accel_y ** 2) + (accel_z ** 2))
 

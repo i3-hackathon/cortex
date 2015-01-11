@@ -40,6 +40,8 @@ def compute_hcl(input):
 	#chunk the graph
 	timestamps, unsafe, hcl_vector, parse_interval = chunk_hcl(hcl)
 
+	set_hcl(hcl_vector)
+
 	#return safe times and unsafe times
 	return timestamps, unsafe, hcl_vector, parse_interval
 
@@ -102,6 +104,7 @@ def chunk_hcl(hcl_vector):
 		plt.axvline(x=final_changepoints[i], linewidth=2, color='k')
 
 	pylab.savefig('static/hcl.png')
+	plt.clf()
 
 	#return expected timestamps, safe/unsafe per segment, full hcl vector (one point per parse_interval), parse_interval
 	return [x * parse_interval for x in final_changepoints], final_unsafe, hcl_vector, parse_interval
@@ -122,11 +125,13 @@ def parse_dicts(input):
 		traffic_time.append(traffic)
 
 		#get average speeds per link - for now
-		if len(leg['speed_limit'])== 0:
-			speed = speed_limit[-1]
+		if len(leg['speed_limit']) == 0:
+			try:
+				speed = speed_limit[-1]
+			except:
+				speed = 50
 		else:
 			speed = sum(leg['speed_limit'])/len(leg['speed_limit'])
-
 		speed_limit.append(speed)
 
 		#durations - length per leg
@@ -158,7 +163,7 @@ def preprocess_hcl(input):
 
 	#speed limit [30, 30, 10, 60, 60 ] : absolute change in speed limit
 	speed_abs_diff = [abs(speed[i] - speed[i-1]) for i in range(1, len(speed))]
-	speed_processed = vectorize_speedOrDirections(durations, speed_abs_diff)	
+	speed_processed = vectorize_speedOrDirections(durations, speed_abs_diff)
 
 	#traffic (diff between traffic_time and base_time [3, 0, 0, 0, 4, 6, 8, 10, 10]
 	#get increase in driving time per minute of each interval
@@ -280,7 +285,7 @@ def get_training_input(test):
 		for j in range(start_point, end_point):
 			accel = accel or test[j]['accelerometer_threshold']
 			lane_departure = lane_departure or test[j]['lane_departure']
-			rpm = rpm or test[j]['rpm_threshold']		
+			rpm = rpm or test[j]['rpm_threshold']
 			speed = speed or test[j]['speed_threshold']
 			steer_min = min(steer_min, test[j]['steering_wheel_angle']) 
 			steer_max = max(steer_min, test[j]['steering_wheel_angle']) 
@@ -346,6 +351,3 @@ def transform_delta_to_event(currTime, inputDelta, currTriggerState, states_rema
 		return True, context, states_remaining
 	else:
 		return trigger, context, states_remaining
-	
-
-	

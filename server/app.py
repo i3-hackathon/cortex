@@ -2,7 +2,9 @@ import os
 import time
 
 from ai import hcl_compute
+from ai import processed_route_10sinterval as demo_data
 from bmw import BMW
+from cors import crossdomain
 from flask import Flask, jsonify, redirect
 from here import Here
 
@@ -21,17 +23,20 @@ bmw = BMW(app_id='2d8a7423-5ea7-4053-a704-0d69dc4e13a9',
 
 
 @app.route('/')
+@crossdomain(origin='*')
 def home():
     return ''
 
 
 @app.route('/oauth-token')
+@crossdomain(origin='*')
 def oauth_token():
     return redirect(bmw.oauth_authorize_url())
 
 
 @app.route('/authorize', defaults={'access_token': None})
 @app.route('/authorize/<access_token>')
+@crossdomain(origin='*')
 def oauth2_authorize(access_token):
     if access_token is None:
         return '''
@@ -49,20 +54,42 @@ def oauth2_authorize(access_token):
         return redirect('/')
 
 
+
+# Demo
+demo_data_point = 0
+demo_trigger_state = 0
+demo_states_remaining = 1
+
 @app.route('/environment')
+@crossdomain(origin='*')
 def get_environment():
     ''' This endpoint will get pinged by the mobile app every second in order
         to figure out the driving status. In a non-hackathon environment this
         would be asynchronous with websockets. '''
 
-    environment = bmw.get_environment()
+    # Real
+    #
+    # environment = bmw.get_environment()
+    # return jsonify({'results': bmw.get_environment()})
+
+    # Demo
+    global demo_data_point, demo_trigger_state, demo_states_remaining
+
+    demo_data_slice = demo_data.data[demo_data_point]
+    demo_data_point = (demo_data_point + 1) % len(demo_data.data)
+
+    trigger, content, states_remaining = hcl_compute.transform_delta_to_event(None, demo_data_slice, demo_trigger_state, demo_states_remaining)
+
+    demo_trigger_state = trigger
+    demo_states_remaining = states_remaining
 
 
+    return jsonify({'result': demo_data_slice, 'context': context})
 
-    return jsonify({'results': bmw.get_environment()})
 
 
 @app.route('/directions/<coordinates>')
+@crossdomain(origin='*')
 def get_directions(coordinates):
     ''' Get driving directions for a series of coordinates. Coordinates should
         be passed in comme and semicolon separated.
@@ -70,6 +97,11 @@ def get_directions(coordinates):
     '''
 
     all_coordinates = []
+
+    # Fixes a jQuery CORS issue
+    coordinates = coordinates.split('&')[0]
+
+    # Parse the coordinates
     for coordinate_pair in coordinates.split(';'):
         all_coordinates.append(map(float, coordinate_pair.split(',')))
 
@@ -81,10 +113,16 @@ def get_directions(coordinates):
     # "parse_interval" number of seconds in each point of the hcl_vector
     timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
 
+    # Demo
+    global demo_trigger_state, demo_states_remaining
+    demo_trigger_state = unsafe[0]
+    demo_states_remaining = 1
+
     return jsonify({'result': directions})
 
 
 @app.route('/bmw')
+@crossdomain(origin='*')
 def get_bmw_data():
     ''' Demo route. '''
 
