@@ -1,5 +1,5 @@
 *.pyc
 .DS_Store
 .vagrant
-
+app/node_modules/
 ngrok.sh
