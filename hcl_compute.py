@@ -336,6 +336,6 @@ def transform_delta_to_event(currTime, deltaSlice, currTriggerState, states_rema
 		return True, context, states_remaining
 	else:
 		return trigger, context, states_remaining
-	return scores
+	
 
 	
