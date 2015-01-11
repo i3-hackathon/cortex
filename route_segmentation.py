@@ -1,10 +1,7 @@
-def precompute_hcl(route_data):
-
-	#preprocess hcl inputs
-	processed_route_data = preprocess_hcl(route_data)
+def precompute_hcl(input):
 
 	#compute base hcl graph
-	compute_hcl(processed_route_data)
+	hcl = compute_hcl(input)
 
 	#chunk the graph
 	chunk_hcl()

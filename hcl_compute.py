@@ -1,13 +1,42 @@
 import rpy2
+import rpy2.interactive as r
+import rpy2.interactive.packages
+from rpy2 import robjects 
+import matplotlib
+import pylab
+import matplotlib.pyplot as plt
 
 #dictionary of max's per var
-route_params = {'directions': 5, 'traffic': 2, 'speed': 45}
+route_params = {'directions': 5, 'traffic': 1, 'speed': 45}
 directions_scores = {''}
 parse_interval = 30 #30 seconds
-def chunk_hcl(route_data):
 
+def chunk_hcl(hcl_vector):
+
+	r.packages.importr('changepoint')
 	#r changepoint module: detect changepoints
+	r_vector = r.FloatVector(hcl_vector)
+	rlib = r.packages.packages
 
+	as_vector = robjects.r("cpt.mean")
+	#change point analysis. heuristic for max # of changepoints
+	max_cpts = round(len(hcl_vector))/8
+	results = rlib.changepoint.cpt_mean(r_vector,penalty="SIC",pen_value=0,method="BinSeg",Q=max_cpts,test_stat="Normal")
+	changepoints = sorted(results.do_slot("cpts"))
+
+	#compute safety of each segment
+	prev_cpt = 0
+	cpt_avgs = []
+	
+	threshold = 
+	for i in range(len(changepoints)):
+		avg = sum(hcl_vector[prev_cpt:changepoints[i]]) / len(hcl_vector[prev_cpt:changepoints[i]])
+
+	avg_per_seg = [sum()]
+	#plot the thing
+	plt.plot(range(len(smoothed)), smoothed, '-o')
+
+	$cps[1,]
 	#classify each segment as safe/unsafe (binary classify) -> more than N unsafes in a segment = unsafe
 
 	#any neighboring segments with the same average are merged
@@ -94,7 +123,6 @@ def exponential_smoothing(input):
 
 	smoothed = []
 	for i in range(span, len(input)-span):
-		print(i+j, i-j)
 		smoothed.append(sum(input[i+j] * factors[j+span] for j in range(-1 * span, span+1)))
 
 	return smoothed
@@ -154,6 +182,5 @@ def compute_hcl(input):
 	#calculate the weighted averages of the series
 	smoothed = exponential_smoothing(aggregate_ts)
 
-	#for every 5 seconds, calculate PCL: weighted average of average values for each variable
-
+	return smoothed
 
