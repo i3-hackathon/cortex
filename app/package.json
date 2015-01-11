@@ -13,6 +13,7 @@
     "gulp-sass": "^1.2.4"
   },
   "devDependencies": {
+    "del": "^1.1.1",
     "gulp": "^3.8.10"
   }
 }
