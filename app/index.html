@@ -97,10 +97,11 @@
           var poll = function() {
             setTimeout(function() {
               console.log('polling');
-              $.ajax({ url: "http://crispybacon.ngrok.com/environment", success: function(data) {
+              $.ajax({ url: "http://crispybacon.ngrok.com/environment",success: function(data) {
                   console.log('data: ' + data);
                   if (data.context.length >= 1 && data.context[0] != "already_on")  {
-                    console.log('vibrate the phone');
+                    // var u = new SpeechSynthesisUtterance('Use your ' + data.context + 'idiot.');
+                    // speechSynthesis.speak(u);
                     navigator.vibrate([200, 100, 200, 100, 200]);
                   }
               }, dataType: "json", complete: poll });
