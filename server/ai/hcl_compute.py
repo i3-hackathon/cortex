@@ -46,9 +46,12 @@ def compute_hcl(input):
 	return timestamps, unsafe, hcl_vector, parse_interval
 
 def set_hcl(output):
+	global hcl_vector
+
 	hcl_vector = output
 
 def chunk_hcl(hcl_vector):
+	global parse_interval
 
 	r.packages.importr('changepoint')
 	#r changepoint module: detect changepoints
@@ -228,6 +231,7 @@ def vectorize_traffic(durations, vals):
 
 #pass in a HERE data vector, normalize and return it
 def normalize(var_name, var_vec):
+	global route_params
 	
 	var_max = route_params[var_name]
 
@@ -299,6 +303,7 @@ def get_training_input(test):
 	return sped_up_vector
 
 def get_delta(delta_input, i):
+	global delta_dev
 
 	#calculate expectations
 	#here they are hardcoded
@@ -317,13 +322,14 @@ def get_delta(delta_input, i):
 
 #at each slice of time, pass in a delta vector. then detect events for each event type
 def transform_delta_to_event(demoDataPoint, inputDelta, currTriggerState, states_remaining):
+	global hcl_vector, parse_interval
 
 	#for each variable, transform delta into a score incorporating the baseline
 
 	#alpha is the weight to delta. 1-alpha the weight to the hcl baseline. get the aggregate score.
 	alpha = 0.75
 
-	deltaSlice = get_delta(inputDelta, currTime)
+	deltaSlice = get_delta(inputDelta, demoDataPoint)
 
 	scores = {}
 

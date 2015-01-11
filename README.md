@@ -9,6 +9,8 @@ Distractions while driving are a leading cause of vehicle accidents on the road.
 3. Run `python server/app.py`
 4. Go to `/oauth-token` to generate an OAuth token
 
+Note: When using Vagrant, to log into the box run `vagrant ssh -- -X`
+
 ## APIs Used
 1. BMW Car Data (http://data.hackthedrive.com/)
 2. Here (http://developer.here.com)

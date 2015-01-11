@@ -76,7 +76,8 @@ def get_environment():
 
     demo_data_slice = demo_data.data[demo_data_point]
 
-    trigger, context, states_remaining = hcl_compute.transform_delta_to_event(demo_data_point, demo_data_slice, demo_trigger_state, demo_states_remaining)
+    trigger, context, states_remaining = hcl_compute.transform_delta_to_event(demo_data_point,
+                                                demo_data_slice, demo_trigger_state, demo_states_remaining)
 
     demo_data_point = (demo_data_point + 1) % len(demo_data.data)
     demo_trigger_state = trigger
@@ -111,9 +112,10 @@ def get_directions(coordinates):
     timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
 
     # Demo
-    global demo_trigger_state, demo_states_remaining
+    global demo_trigger_state, demo_states_remaining, demo_data_point
+    demo_data_point = 0
     demo_trigger_state = unsafe[0]
-    demo_states_remaining = 1
+    demo_states_remaining = 0
 
     return jsonify({'result': directions})
 
@@ -125,6 +127,12 @@ def get_bmw_data():
 
     directions = here.get_directions_bmw_data()
     timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
+
+    # Demo
+    global demo_trigger_state, demo_states_remaining, demo_data_point
+    demo_data_point = 0
+    demo_trigger_state = 0
+    demo_states_remaining = 0
 
     return jsonify({'result': directions})
 
