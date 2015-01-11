@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 #dictionary of max's per var
 route_params = {'directions': 5, 'traffic': 1, 'speed': 45}
-directions_scores = {''}
-parse_interval = 30 #30 seconds
+#30 seconds per parse
+parse_interval = 30 
 
 def chunk_hcl(hcl_vector):
 
@@ -61,9 +61,9 @@ def chunk_hcl(hcl_vector):
 		prev_unsafe = unsafe[i]
 		i = i + 1
 
-	#return expected timestamps of 
+	#return expected timestamps
+	return [x * 30 for x in final_changepoints], final_unsafe
 
-	#any segments that are too short ...?
 
 #parse a list of dicts
 def parse_dicts(input):
