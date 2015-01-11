@@ -22,24 +22,46 @@ def chunk_hcl(hcl_vector):
 	#change point analysis. heuristic for max # of changepoints
 	max_cpts = round(len(hcl_vector))/8
 	results = rlib.changepoint.cpt_mean(r_vector,penalty="SIC",pen_value=0,method="BinSeg",Q=max_cpts,test_stat="Normal")
-	changepoints = sorted(results.do_slot("cpts"))
+	changepoints = [int(x) for x in sorted(results.do_slot("cpts"))]
 
 	#compute safety of each segment
 	prev_cpt = 0
 	cpt_avgs = []
-	
-	threshold = 
-	for i in range(len(changepoints)):
-		avg = sum(hcl_vector[prev_cpt:changepoints[i]]) / len(hcl_vector[prev_cpt:changepoints[i]])
 
-	avg_per_seg = [sum()]
+	#set threshold for "unsafe": mean value
+	threshold = sum(hcl_vector)/len(hcl_vector)
+	unsafe = [0] * len(changepoints)
+
+	prev_cpt = 0
+	#calculate # of unsafe points in each segment. classify each segment as safe/unsafe -> more than N unsafes in a segment = unsafe
+	for i in range(len(changepoints)-1):
+		for j in range(prev_cpt, changepoints[i]):
+			if(hcl_vector[j] > threshold):
+				unsafe[i] += 1
+		#this is janky heuristic
+		if(unsafe[i] > min(2*round((changepoints[i+1] - changepoints[i])/3), 3)):
+			unsafe[i] = 1
+		else:
+			unsafe[i] = 0
+		prev_cpt = changepoints[i]
+
 	#plot the thing
-	plt.plot(range(len(smoothed)), smoothed, '-o')
+	#plt.plot(range(len(smoothed)), smoothed, '-o')
+	#plt.show()
 
-	$cps[1,]
-	#classify each segment as safe/unsafe (binary classify) -> more than N unsafes in a segment = unsafe
-
+	final_changepoints = [changepoints[0]]
+	final_unsafe = [unsafe[0]]
+	i = 1
 	#any neighboring segments with the same average are merged
+	prev_unsafe = changepoints[0]
+	while i<len(changepoints):
+		if(unsafe[i] != prev_unsafe):
+			final_changepoints.append(changepoints[i])
+			final_unsafe.append(unsafe[i])
+		prev_unsafe = unsafe[i]
+		i = i + 1
+
+	#return expected timestamps of 
 
 	#any segments that are too short ...?
 
