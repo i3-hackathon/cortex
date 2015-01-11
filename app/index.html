@@ -146,13 +146,9 @@
             setInterval(function() {
                var v = data.shift(); // remove the first element of the array
                data.push(v); // add a new element to the array (we're just taking the number we just shifted off the front and appending to the end)
-               if (data[0] > 8 && flag != 1) {
-                 var flag = 1;
+               if (data[0] == 11.83978281) {
                  var u = new SpeechSynthesisUtterance('Use caution ahead.');
                  speechSynthesis.speak(u);
-               }
-               if (data[0 < 8]) {
-                var flag = 0;
                }
                if(data[0] > 15) {
                 $('.blackout').addClass('danger');
