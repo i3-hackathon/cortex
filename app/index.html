@@ -39,19 +39,33 @@
         </nav>
       </div>
 
-      <iframe id="mapbox" width='100%' height='100%' frameBorder='0' src='https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg'></iframe>
+      <div class="init">
+        <iframe id="mapbox" width='100%' height='100%' frameBorder='0' src='https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg'></iframe>
 
-      <form id="address-lookup">
-        <input type="text" id="lookup-input" class="search-shift" placeholder="Enter Destination">
-        <button type="submit" id="lookup-submit"></button>
-      </form>
+        <form id="address-lookup">
+          <input type="text" id="lookup-input" class="search-shift" placeholder="Enter Destination">
+          <button type="submit" id="lookup-submit"></button>
+        </form>
+      </div>
+
+      <div class="blackout">
+        <div class="btn-container">
+          <a class="waves-effect waves-light btn">End Trip</a>
+        </div>
+      </div>
 
       <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
       <script type="text/javascript" src="dist/js/app.min.js"></script>
+
       <script type="text/javascript">
         $(function() {
           $(".button-collapse").sideNav();
           $('.collapsible').collapsible();
+
+          navigator.vibrate = navigator.vibrate ||
+                              navigator.webkitVibrate ||
+                              navigator.mozVibrate || 
+                              navigator.msVibrate;
 
           $('#address-lookup').submit(function(){
             document.activeElement.blur();
@@ -63,17 +77,34 @@
               $("#mapbox").attr("src", "https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg#17/" + lat + "/" + lon);
             });
 
-            poll();
+            window.setTimeout(function() { blackOut() }, 2500);
           });
 
-          function poll() {
+          function blackOut() {
+            $.ajax({
+              url: "http://crispybacon.ngrok.com/directions/37.788297,-122.401527;37.786214,-122.398987;37.783356,-122.402695;37.593055,-122.366036&callback=?",
+              contentType: "application/json",
+              dataType: "json",
+              success: function(data) {
 
-             setTimeout(function() {
-                console.log('etst');
-                // $.ajax({ url: "", success: function(data) {
-                //   console.log(data);
-                // }, dataType: "json", complete: poll });
-              }, 30000);
+              }
+            });
+
+            $('.blackout').fadeIn();
+            poll();
+          }
+
+          var poll = function() {
+            setTimeout(function() {
+              console.log('polling');
+              $.ajax({ url: "http://crispybacon.ngrok.com/environment", success: function(data) {
+                  console.log('data: ' + data);
+                  if (data.context.length >= 1 && data.context[0] != "already_on")  {
+                    console.log('vibrate the phone');
+                    navigator.vibrate([200, 100, 200, 100, 200]);
+                  }
+              }, dataType: "json", complete: poll });
+            }, 1000)
           };
         });
       </script>
