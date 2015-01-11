@@ -1,0 +1,20 @@
+.nav-shift {
+  background: #03A9F4;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+
+  i.small {
+    font-size: 2rem;
+  }
+}
+
+.nav-title {
+  font-size: 1.2rem;
+  padding-left: 1em;
+}
+
+.nav-shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

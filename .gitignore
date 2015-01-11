@@ -3,3 +3,4 @@
 .vagrant
 app/node_modules/
 ngrok.sh
+app/dist/

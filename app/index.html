@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <link type="text/css" rel="stylesheet" href="dist/css/application.css"  media="screen,projection"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, user-scalable=0">
+      <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAY-nH8lGw66dRFiZAlqLVtiaktdKMeTxY"></script>
+    </head>
+
+    <body>
+      <div class="navbar">
+        <nav class="nav-shift nav-shadow">
+          <div class="nav-wrapper">
+            <ul id="slide-out" class="side-nav full">
+              <li><a href="#!">Profile Link</a></li>
+              <li class="no-padding">
+                <ul class="collapsible collapsible-accordion">
+                  <li>
+                    <div class="collapsible-header">Dropdown<i class="mdi-navigation-arrow-drop-down"></i></div>
+                    <div class="collapsible-body">
+                      <ul>
+                        <li><a href="#!">First Dropdown Link</a></li>
+                        <li><a href="#!">Second Dropdown Link</a></li>
+                        <li><a href="#!">Third Dropdown Link</a></li>
+                        <li><a href="#!">Fourth Dropdown Link</a></li>
+                      </ul>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <a href="#" class="button-collapse" data-activates="slide-out">
+              <i class="mdi-navigation-menu small"></i>
+            </a>
+            <span class="nav-title">
+              Welcome Back, Lucas
+            </span>
+          </div>
+        </nav>
+      </div>
+
+      <iframe id="mapbox" width='100%' height='100%' frameBorder='0' src='https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg'></iframe>
+
+      <form id="address-lookup">
+        <input type="text" id="lookup-input" class="search-shift" placeholder="Enter Destination">
+        <button type="submit" id="lookup-submit"></button>
+      </form>
+
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="dist/js/app.min.js"></script>
+      <script type="text/javascript">
+        $(function() {
+          $(".button-collapse").sideNav();
+          $('.collapsible').collapsible();
+
+          $('#address-lookup').submit(function(){
+            document.activeElement.blur();
+            var uri = $('#lookup-input').val();
+            var res = encodeURI(uri);
+            $.get("http://nominatim.openstreetmap.org/search/" + res + "?format=json", function(data) {
+              var lat = data[0].lat;
+              var lon = data[0].lon;
+              $("#mapbox").attr("src", "https://a.tiles.mapbox.com/v4/zethussuen.knmgk6o5/attribution.html?access_token=pk.eyJ1IjoiemV0aHVzc3VlbiIsImEiOiIyZGI4b0s0In0.4KYPpddLctv5QQb6Pu2Bvg#17/" + lat + "/" + lon);
+            });
+
+            poll();
+          });
+
+          function poll() {
+
+             setTimeout(function() {
+                console.log('etst');
+                // $.ajax({ url: "", success: function(data) {
+                //   console.log(data);
+                // }, dataType: "json", complete: poll });
+              }, 30000);
+          };
+        });
+      </script>
+
+    </body>
+  </html>
