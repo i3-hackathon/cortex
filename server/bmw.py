@@ -46,7 +46,6 @@ class BMW:
 
         return authorize.url
 
-
     def get_environment(self):
         ''' Returns the current driving environment based on sensor data '''
 
@@ -83,6 +82,6 @@ class BMW:
         accel_y = status.get('Accelerometer', {}).get('Y', 0)
         accel_z = status.get('Accelerometer', {}).get('Z', 0)
 
-        environment['accelerometer'] = math.sqrt((accel_x ** 2) + (accel_y ** 2) + (accel_x ** 2))
+        environment['accelerometer'] = math.sqrt((accel_x ** 2) + (accel_y ** 2) + (accel_z ** 2))
 
         return environment

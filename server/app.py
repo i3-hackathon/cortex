@@ -18,6 +18,7 @@ bmw = BMW(app_id='2d8a7423-5ea7-4053-a704-0d69dc4e13a9',
           access_token='edd44c7f-b6c1-4c8c-80de-00aa1644071d',
           redirect_uri='%s/authorize' % (domain))
 
+
 @app.route('/')
 def home():
     return ''
@@ -57,6 +58,7 @@ def get_environment():
 
     return jsonify({'results': log})
 
+
 @app.route('/directions/<coordinates>')
 def get_directions(coordinates):
     ''' Get driving directions for a series of coordinates. Coordinates should
@@ -74,6 +76,7 @@ def get_directions(coordinates):
 @app.route('/bmw')
 def get_bmw_data():
     return jsonify({'result': here.get_directions_bmw_data()})
+
 
 if __name__ == '__main__':
     host = str(os.getenv('HOST', '0.0.0.0'))
