@@ -11,6 +11,12 @@ Distractions while driving are a leading cause of vehicle accidents on the road.
 
 Note: When using Vagrant, to log into the box run `vagrant ssh -- -X`
 
+## Front End Setup
+1. Install `nodejs` and `npm`
+2. Run `npm install` within the `app/` directory
+3. Useful commands are: `gulp clean`, `gulp assets`
+4. To run the app server, run `http-server`
+
 ## APIs Used
 1. BMW Car Data (http://data.hackthedrive.com/)
 2. Here (http://developer.here.com)
