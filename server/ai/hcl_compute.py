@@ -98,10 +98,10 @@ def chunk_hcl(hcl_vector):
 		prev_unsafe = unsafe[i]
 		i = i + 1
 
-	for i in range(len(changepoints)):
+	for i in range(len(final_changepoints)):
 		plt.axvline(x=final_changepoints[i], linewidth=2, color='k')
 
-	pylab.savefig('cortex/static/hcl.png')
+	pylab.savefig('static/hcl.png')
 
 	#return expected timestamps, safe/unsafe per segment, full hcl vector (one point per parse_interval), parse_interval
 	return [x * parse_interval for x in final_changepoints], final_unsafe, hcl_vector, parse_interval

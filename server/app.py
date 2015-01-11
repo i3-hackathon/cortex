@@ -91,8 +91,6 @@ def get_bmw_data():
     directions = here.get_directions_bmw_data()
     timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
 
-    import code; code.interact(local=dict(globals(), **locals()))
-
     return jsonify({'result': directions})
 
 
