@@ -15,6 +15,20 @@ def home():
     return ''
 
 
+@app.route('/directions/<coordinates>')
+def get_directions(coordinates):
+    ''' Get driving directions for a series of coordinates. Coordinates should
+        be passed in comme and semicolon separated.
+        Ex: 37.788297,-122.401527;37.786214,-122.398987;37.783356,-122.402695
+    '''
+
+    all_coordinates = []
+    for coordinate_pair in coordinates.split(';'):
+        all_coordinates.append(map(float, coordinate_pair.split(',')))
+
+    return jsonify({'result': here.get_directions(all_coordinates)})
+
+
 @app.route('/bmw')
 def get_bmw_data():
     return jsonify({'result': here.get_directions_bmw_data()})

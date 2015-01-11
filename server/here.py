@@ -39,7 +39,7 @@ class Here:
 
         waypoint_params = {}
         for i in xrange(len(waypoints)):
-            waypoint = 'geo!%f,%f' % waypoints[i]
+            waypoint = 'geo!%f,%f' % (waypoints[i][0], waypoints[i][1])
             waypoint_params['waypoint%d' % i] = waypoint
 
         params = {
@@ -95,7 +95,7 @@ class Here:
             machine learning algorithm. '''
 
         return self.get_directions([
-            (37.788297, -122.401527),
-            (37.786214, -122.398987),
-            (37.783356, -122.402695),
-            (37.593055, -122.366036)])
+            [37.788297, -122.401527],
+            [37.786214, -122.398987],
+            [37.783356, -122.402695],
+            [37.593055, -122.366036]])
