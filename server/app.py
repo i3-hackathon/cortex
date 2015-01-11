@@ -1,3 +1,4 @@
+import json
 import os
 
 from ai.hcl_compute2 import ShiftAI
@@ -115,6 +116,23 @@ def get_bmw_data():
     current_context = hcl_compute.context
 
     return jsonify({'result': directions, 'context': current_context})
+
+
+@app.route('/hcl')
+@crossdomain(origin='*')
+def hcl_vector():
+    ''' Dashboard for our stuff. '''
+
+    return json.dumps(hcl_compute.real_time_hcl) #jsonify({'hcl_vector': hcl_compute.hcl_vector })
+
+
+@app.route('/map_json')
+@crossdomain(origin='*')
+def map_json():
+    ''' Dashboard for our stuff. '''
+
+    return json.dumps(hcl_compute.demo_map_locations) #jsonify({'hcl_vector': hcl_compute.hcl_vector })
+
 
 
 if __name__ == '__main__':

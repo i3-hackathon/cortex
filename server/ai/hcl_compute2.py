@@ -26,6 +26,8 @@ class ShiftAI:
         self.speed_up_factor = 10
         self.delta_dev = []
         self._init_demo_delta_deviations()
+        self.real_time_hcl = []
+        self.demo_map_locations = []
         #### </DEMO> ####
 
     def initialize_trip(self, here_directions):
@@ -38,13 +40,23 @@ class ShiftAI:
         self.demo_hcl_vector = hcl_vector
         self.demo_trigger_state = unsafe[0]
         self.demo_states_remaining = int(unsafe[0])
+        self.real_time_hcl = []
+
+        self.demo_map_locations = []
+        for segment in here_directions:
+            self.demo_map_locations.append({'latitude': segment['lat'],
+                                            'longitude': segment['lon']})
+
 
     def calculate_hcl(self, bmw_sensor_data, demo_counter=0):
-        trigger, context, states_remaining = self.transform_delta_to_event(demo_counter,
+        trigger, context, states_remaining, total_score = self.transform_delta_to_event(demo_counter,
                                                 bmw_sensor_data, self.demo_trigger_state, self.demo_states_remaining)
 
         self.demo_states_remaining = states_remaining
         self.current_context = context
+
+        self.real_time_hcl.append({'here_hcl': self.hcl_vector[demo_counter],
+                                   'real_hcl': total_score})
 
         return context
 
@@ -371,9 +383,11 @@ class ShiftAI:
             context = []
 
         trigger = False
+        sum_of_scores = 0
         for key in deltaSlice.keys():
             score = alpha * deltaSlice[key] + (1-alpha) * (self.hcl_vector[int(round(demoDataPoint * 5 / self.parse_interval))])/max(self.hcl_vector) 
             scores[key] = score
+            sum_of_scores += score
 
             #from scores to events
             if(score > 0.5):
@@ -384,8 +398,10 @@ class ShiftAI:
                 else:
                     context.append(key)
 
+        total_score = sum_of_scores / len(scores)
+
         if(trigger == False and states_remaining > 0):
             states_remaining = states_remaining - 1
-            return True, context, states_remaining
+            return True, context, states_remaining, total_score
         else:
-            return trigger, context, states_remaining
+            return trigger, context, states_remaining, total_score

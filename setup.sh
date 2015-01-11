@@ -16,3 +16,6 @@ sudo pip install rpy2
 sudo R
 # install.packages("changepoint")
 # q()
+
+# Front End
+sudo apt-get install nodejs npm
