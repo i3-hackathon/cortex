@@ -1,7 +1,7 @@
 import rpy2
 
-#dictionary of route variable means and variances
-route_params = {'directions': [10, 10], 'traffic': [10, 10], 'speed': [0.7, 0.3]}
+#dictionary of max's per var
+route_params = {'directions': 5, 'traffic': 2, 'speed': 45}
 directions_scores = {''}
 parse_interval = 30 #30 seconds
 def chunk_hcl(route_data):
@@ -53,7 +53,7 @@ def convert_action_to_score(action):
 
 
 #route_data is a list of dicts
-def preprocess_hcl(route_data):
+def preprocess_hcl(input):
 
 	directions, traffic, speed, durations = parse_dicts(input)
 
@@ -73,9 +73,7 @@ def preprocess_hcl(route_data):
 	#slopes - high slopes
 	#traffic signs
 
-	return speed_processed, traffic_per_norm_processed, directions_processed
-
-
+	return directions_processed, speed_processed, traffic_processed
 
 #smooth the HCL
 def exponential_smoothing(input):
@@ -131,19 +129,24 @@ def vectorize_traffic(durations, vals):
 #pass in a HERE data vector, normalize and return it
 def normalize(var_name, var_vec):
 	
-	[var_mean, var_variance] = route_params[var_name]
-	
-	var_vec = [value - var_mean for value in var_vec]
-	var_vec = [value/var_variance for value in var_vec]
+	var_max = route_params[var_name]
+
+	#get min to 0
+	var_vec = [x - min(var_vec) for x in var_vec]
+	#use max of (param, observed_param_max) in the scaling normalization
+	var_vec = [100 * x / max(var_max, max(var_vec)) for x in var_vec]
 
 	return var_vec
 
-def compute_hcl(route_data):
+def compute_hcl(input):
 
-	#get inputs
-	parse_dicts(input)
 	#get processed values
-	speed, traffic, directions = preprocess(route_data)
+	directions, speed, traffic = preprocess_hcl(input)
+
+	#stupid normalization
+	directions = normalize('directions', directions)
+	speed = normalize('speed', speed)
+	traffic = normalize('traffic', traffic)
 
 	#aggregated weighted average into one ts
 	aggregate_ts = [sum(a)/len(a) for a in zip(speed, traffic, directions)]
