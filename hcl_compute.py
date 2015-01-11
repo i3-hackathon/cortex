@@ -23,6 +23,7 @@ def preprocess_hcl(route_data):
 
 	#directions - [0, 0, 1, 0, 0, ...] 1's are any sort of risky move: turn etc.
 
+
 depart, departAirport, arrive, arriveAirport, arriveLeft, arriveRight,
 leftLoop,leftUTurn,sharpLeftTurn, leftTurn, continue, slightRightTurn, rightTurn,sharpRightTurn,
 rightUTurn, rightLoop, leftExit, rightExit, leftRamp, rightRamp, leftFork, middleFork, rightFork,
@@ -50,16 +51,37 @@ rightRoundaboutExit11, rightRoundaboutExit12]
 	#slopes - high slopes
 	#traffic signs
 
-	#EXPONENTIAL SMOOTHING
+	return speed_processed, traffic_per_norm_processed, directions_processed
 
+
+
+#smooth the HCL
+def exponential_smoothing(input):
+	
+	#EXPONENTIAL SMOOTHING
+	#discount factor alpha
+	alpha_one = 0.5
+	#sliding window span
+	span = 5
+	#exponential discounting function is discount = 0.5 ^ n where n is the steps away from center. max steps = span = 5
+	factors = [alpha ** abs(n) for n in range(-1 * span, span + 1)]
+	#normalize
+	factors = [factor / sum(factors) for factor in factors]
+	
+	#add 0's at start and end
+	dummy = [0]*span
+	input = dummy + input + dummy
+
+	smoothed = []
+	for i in range(span, len(input)-span):
+		print(i+j, i-j)
+		smoothed.append(sum(input[i+j] * factors[j+span] for j in range(-1 * span, span+1)))
+
+	return smoothed
 
 def get_direction(direction_input):
 
 
-def compute_hcl(route_data):
-	#normalize by estimated population mean, var 
-
-	#for every 5 seconds, calculate PCL: weighted average of average values for each variable
 
 #get in lists of timestamps at which var changes occur, values within each interval
 #return a time series vector
@@ -85,9 +107,16 @@ def normalize(var_name, var_vec):
 
 	return var_vec
 
-def get_turns()
+def compute_hcl(route_data):
+	#get processed values
+	speed, traffic, directions = preprocess(route_data)
 
-def get_speedlimits()
+	#aggregated weighted average into one ts
+	aggregate_ts = [sum(a)/len(a) for a in zip(speed, traffic, directions)]
 
-
+	#calculate the weighted averages of the series
+	smoothed = exponential_smoothing(aggregate_ts)
+	
+	#for every 5 seconds, calculate PCL: weighted average of average values for each variable
+	
 
