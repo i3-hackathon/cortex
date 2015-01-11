@@ -55,11 +55,8 @@ def oauth2_authorize(access_token):
         return redirect('/')
 
 
-# Demo
-demo_data_point = 0
-demo_trigger_state = 0
-demo_states_remaining = 1
 
+demo_counter = 0
 
 @app.route('/environment')
 @crossdomain(origin='*')
@@ -68,24 +65,19 @@ def get_environment():
         to figure out the driving status. In a non-hackathon environment this
         would be asynchronous with websockets. '''
 
-    # Real
-    #
+    # # Real Path
     # environment = bmw.get_environment()
-    # return jsonify({'results': bmw.get_environment()})
+    # context = hcl_compute.calculate_hcl(environment)
+    # return jsonify({'result': environment, 'context': context})
 
-    # Demo
-    global demo_data_point, demo_trigger_state, demo_states_remaining
+    # Demo Path
+    global demo_counter
 
-    demo_data_slice = demo_data.data[demo_data_point]
+    environment = demo_data.data[demo_counter]
+    context = hcl_compute.calculate_hcl(environment, demo_counter=demo_counter)
+    demo_counter = (demo_counter + 1) % len(demo_data.data)
 
-    trigger, context, states_remaining = hcl_compute.transform_delta_to_event(demo_data_point,
-                                                demo_data_slice, demo_trigger_state, demo_states_remaining)
-
-    demo_data_point = (demo_data_point + 1) % len(demo_data.data)
-    demo_trigger_state = trigger
-    demo_states_remaining = states_remaining
-
-    return jsonify({'result': demo_data_slice, 'context': context})
+    return jsonify({'result': environment, 'context': context})
 
 
 @app.route('/directions/<coordinates>')
@@ -107,19 +99,10 @@ def get_directions(coordinates):
 
     directions = here.get_directions(all_coordinates)
 
-    # "timestamps" are the markers between safe and unsafe zones
-    # "unsafe" is the safety of every zone (0 1 0 1 ...)
-    # "hcl_vector" shows the hcl score for every point in time
-    # "parse_interval" number of seconds in each point of the hcl_vector
-    timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
+    hcl_compute.initialize_trip(directions)
+    current_context = hcl_compute.context
 
-    # Demo
-    global demo_trigger_state, demo_states_remaining, demo_data_point
-    demo_data_point = 0
-    demo_trigger_state = unsafe[0]
-    demo_states_remaining = 0
-
-    return jsonify({'result': directions, 'context': []})
+    return jsonify({'result': directions, 'context': current_context})
 
 
 @app.route('/bmw')
@@ -128,15 +111,10 @@ def get_bmw_data():
     ''' Demo route. '''
 
     directions = here.get_directions_bmw_data()
-    timestamps, unsafe, hcl_vector, parse_interval = hcl_compute.compute_hcl(directions)
+    hcl_compute.initialize_trip(directions)
+    current_context = hcl_compute.context
 
-    # Demo
-    global demo_trigger_state, demo_states_remaining, demo_data_point
-    demo_data_point = 0
-    demo_trigger_state = 0
-    demo_states_remaining = 0
-
-    return jsonify({'result': directions})
+    return jsonify({'result': directions, 'context': current_context})
 
 
 if __name__ == '__main__':

@@ -15,6 +15,7 @@ class ShiftAI:
 
         # HCL Vector
         self.hcl_vector = []
+        self.context = []
 
         # Dictionary of max values per variable
         self.route_params = {'directions': 5, 'traffic': 1, 'speed': 45}
@@ -27,6 +28,25 @@ class ShiftAI:
         self._init_demo_delta_deviations()
         #### </DEMO> ####
 
+    def initialize_trip(self, here_directions):
+        timestamps, unsafe, hcl_vector, parse_interval = self.compute_hcl(here_directions)
+        self.current_context = []
+
+        # TODO: Refactor
+        self.demo_timestamps = timestamps
+        self.demo_unsafe = unsafe
+        self.demo_hcl_vector = hcl_vector
+        self.demo_trigger_state = unsafe[0]
+        self.demo_states_remaining = int(unsafe[0])
+
+    def calculate_hcl(self, bmw_sensor_data, demo_counter=0):
+        trigger, context, states_remaining = self.transform_delta_to_event(demo_counter,
+                                                bmw_sensor_data, self.demo_trigger_state, self.demo_states_remaining)
+
+        self.demo_states_remaining = states_remaining
+        self.current_context = context
+
+        return context
 
     def _init_demo_delta_deviations(self, count=15):
         ''' Manually defined delta deviations for demo. '''
@@ -134,7 +154,7 @@ class ShiftAI:
 
         for leg in input:
             action = leg['action']
-            directions.append(self.convert_action_to_score(action))
+            directions.append(self._action_to_score(action))
 
             traffic = float(leg['traffic_time'])/float(leg['base_time'])
             traffic_time.append(traffic)
@@ -154,17 +174,20 @@ class ShiftAI:
         
         return directions, traffic_time, speed_limit, durations
 
-    def convert_action_to_score(self, action):
+    def _action_to_score(self, action):
+        ''' Convert text actions to their danger score. '''
 
         action = action.lower()
+        dangerous_actions = {
+            5: ['sharp', 'exit', 'ramp'],
+            4: ['merge', 'fork', 'loop'],
+            3: ['loop', 'turn']
+        }
 
-        if(action.find("sharp") >= 0 or action.find("exit") >=0 or action.find("ramp") >= 0): 
-            return 5
-        if(action.find("merge") >= 0 or action.find("fork") >= 0 or action.find("loop") >= 0):
-            return 4
-        if(action.find("loop") >= 0 or action.find("turn") >= 0):
-            return 3
-        
+        for score in sorted(dangerous_actions.keys(), reverse=True):
+            if any(keyword in action for keyword in dangerous_actions[score]):
+                return score
+
         return 0
 
 
