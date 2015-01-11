@@ -1,6 +1,7 @@
 *.pyc
 .DS_Store
 .vagrant
-app/node_modules/
+hcl.png
 ngrok.sh
 app/dist/
+app/node_modules/
