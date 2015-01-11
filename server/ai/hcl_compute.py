@@ -86,14 +86,14 @@ def chunk_hcl(hcl_vector):
 
 	plt.plot(range(len(hcl_vector)), hcl_vector, '-o')
 
-	final_changepoints = [changepoints[0]]
+	final_changepoints = []
 	final_unsafe = [unsafe[0]]
 	i = 1
 	#any neighboring segments with the same average are merged
 	prev_unsafe = changepoints[0]
 	while i<len(changepoints):
 		if(unsafe[i] != prev_unsafe):
-			final_changepoints.append(changepoints[i])
+			final_changepoints.append(changepoints[i-1])
 			final_unsafe.append(unsafe[i])
 		prev_unsafe = unsafe[i]
 		i = i + 1
