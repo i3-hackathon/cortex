@@ -5,11 +5,46 @@ from rpy2 import robjects
 import matplotlib
 import pylab
 import matplotlib.pyplot as plt
+import random
 
 #dictionary of max's per var
 route_params = {'directions': 5, 'traffic': 1, 'speed': 45}
 #30 seconds per parse
 parse_interval = 30 
+#global hcl vector
+hcl_vector = []
+
+speed_up_factor = 10
+
+#manually defined delta deviations
+delta_dev = []
+for i in range(15):
+	delta_dev.append({'accel': 0.0,
+ 'brakes': 0.0,
+ 'lane': 0.0,
+ 'rain': 0.0,
+ 'rpm': 0.0,
+ 'speed': 0.0,
+ 'steer_change': 0.0})
+	#perturbations - these were observed in the data
+	delta_dev[5]['brakes'] = 0.7
+	delta_dev[4]['brakes'] = 0.7
+	delta_dev[5]['steer_change'] = 0.8
+
+#input is list of dicts
+def compute_hcl(input):
+
+	#compute base hcl graph
+	hcl = precompute_hcl(input)
+
+	#chunk the graph
+	timestamps, unsafe, hcl_vector, parse_interval = chunk_hcl(hcl)
+
+	#return safe times and unsafe times
+	return timestamps, unsafe, hcl_vector, parse_interval
+
+def set_hcl(output):
+	hcl_vector = output
 
 def chunk_hcl(hcl_vector):
 
@@ -61,8 +96,8 @@ def chunk_hcl(hcl_vector):
 		prev_unsafe = unsafe[i]
 		i = i + 1
 
-	#return expected timestamps
-	return [x * 30 for x in final_changepoints], final_unsafe
+	#return expected timestamps, safe/unsafe per segment, full hcl vector (one point per parse_interval), parse_interval
+	return [x * parse_interval for x in final_changepoints], final_unsafe, hcl_vector, parse_interval
 
 
 #parse a list of dicts
@@ -188,7 +223,7 @@ def normalize(var_name, var_vec):
 
 	return var_vec
 
-def compute_hcl(input):
+def precompute_hcl(input):
 
 	#get processed values
 	directions, speed, traffic = preprocess_hcl(input)
@@ -206,3 +241,101 @@ def compute_hcl(input):
 
 	return smoothed
 
+############################################
+#REALTIME STUFF
+
+#IRL, compute based on history of rides
+#here, return a preset expectation
+def expectation_route():
+	
+
+#just for training
+def get_training_input(test):
+
+	sped_up_vector = []
+
+	#every 10 seconds, get a data point for those 10 seconds
+	for i in range(len(test)/speed_up_factor):
+		
+		start_point = i * speed_up_factor
+		end_point = (i+1) * speed_up_factor
+
+		accel = False
+		lane_departure = False
+		rpm = False
+		speed = False
+		steer_min = test[start_point]['steering_wheel_angle']
+		steer_max = steer_min
+
+		for j in range(start_point, end_point):
+			accel = accel or test[j]['accelerometer_threshold']
+			lane_departure = lane_departure or test[j]['lane_departure']
+			rpm = rpm or test[j]['rpm_threshold']		
+			speed = speed or test[j]['speed_threshold']
+			steer_min = min(steer_min, test[j]['steering_wheel_angle']) 
+			steer_max = max(steer_min, test[j]['steering_wheel_angle']) 
+
+		steer_change = steer_max - steer_min
+		brakes = test[end_point]['brake_torque']
+		rain = test[end_point]['rain_intensity']
+
+		sped_up_vector.append({"accel": accel, "lane": lane_departure, "rpm": rpm, "speed": speed, "steer_change": steer_change, "brakes": brakes, "rain": rain})
+
+	return sped_up_vector
+
+def get_delta(processed_bmw):
+
+	#calculate expectations
+	#here they are hardcoded
+	delta = []
+
+	#get normalized delta: observed - expectations (off historical data). here, randomly generated w/ preset perturbations
+	for i in range(len(processed_bmw)):
+		 delta_curr = {'accel': random.normalvariate(0, 0.1) + delta_dev[i]['accel'],
+		 'brakes': random.normalvariate(0, 0.1) + delta_dev[i]['brakes'],
+		 'lane': random.normalvariate(0, 0.1) + delta_dev[i]['lane'],
+		 'rain': random.normalvariate(0, 0.1) + delta_dev[i]['rain'],
+		 'rpm': random.normalvariate(0, 0.1) + delta_dev[i]['rpm'],
+		 'speed': random.normalvariate(0, 0.1) + delta_dev[i]['speed'],
+		 'steer_change': random.normalvariate(0, 0.1) + delta_dev[i]['steer_change']}
+		 delta.append(delta_curr)
+
+	return delta
+
+#at each slice of time, pass in a delta vector. then detect events for each event type
+def transform_delta_to_event(currTime, deltaSlice, currTriggerState, states_remaining):
+
+	#for each variable, transform delta into a score incorporating the baseline
+
+	#alpha is the weight to delta. 1-alpha the weight to the hcl baseline. get the aggregate score.
+	alpha = 0.75
+
+	scores = {}
+
+	if(states_remaining > 0):
+		context = ['already_on']
+	else:
+		context = []
+
+	trigger = False
+	for key in deltaSlice.keys():
+		score = alpha * deltaSlice[key] + (1-alpha) * (hcl_vector[int(round(currTime * speed_up_factor / parse_interval))])/max(hcl_vector) 
+		scores[key] = score
+
+		#from scores to events
+		if(score > 0.5):
+			trigger = True
+			states_remaining = 1
+			if(context == ['already_on']):
+				context = [key]
+			else:
+				context.append(key)
+
+	if(trigger == False and states_remaining > 0):
+		states_remaining = states_remaining - 1
+		return True, context, states_remaining
+	else:
+		return trigger, context, states_remaining
+	return scores
+
+	

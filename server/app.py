@@ -1,4 +1,5 @@
 import os
+import time
 
 from bmw import BMW
 from flask import Flask, jsonify, redirect
@@ -48,7 +49,13 @@ def oauth2_authorize(access_token):
 
 @app.route('/environment')
 def get_environment():
-    return jsonify({'result': bmw.get_environment()})
+
+    log = []
+    for t in xrange(250):
+        log.append(bmw.get_environment())
+        time.sleep(1)
+
+    return jsonify({'results': log})
 
 @app.route('/directions/<coordinates>')
 def get_directions(coordinates):
