@@ -315,10 +315,6 @@ def get_delta(delta_input, i):
 
 	return delta_curr
 
-2s
-
-25
-
 #at each slice of time, pass in a delta vector. then detect events for each event type
 def transform_delta_to_event(demoDataPoint, inputDelta, currTriggerState, states_remaining):
 
