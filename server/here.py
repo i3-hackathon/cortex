@@ -42,6 +42,8 @@ class Here:
             waypoint = 'geo!%f,%f' % (waypoints[i][0], waypoints[i][1])
             waypoint_params['waypoint%d' % i] = waypoint
 
+        # TODO: Ask Jared about Platform Data Extension (specifically Blackspots,
+        #       but also curvature and slope, railroad crossings, stops.
         params = {
             'mode': 'fastest;car;traffic:enabled',
             'legAttributes': 'baseTime,trafficTime,links',
