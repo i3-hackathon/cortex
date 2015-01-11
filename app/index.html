@@ -48,7 +48,7 @@
       </div>
 
       <div class="blackout">
-        <div id="graph1" class="aGraph" style="width:360px; height:500px;"></div>
+        <div id="graph1" class="aGraph" style="width:360px; height:300px;"></div>
       </div>
 
       <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -91,7 +91,7 @@
           }
 
           var poll = function() {
-            displayGraph("#graph1", 360, 500, "basis", true, 1000, 1000);
+            displayGraph("#graph1", 360, 300, "basis", true, 1000, 1000);
 
             setTimeout(function() {
               $.ajax({ url: "http://crispybacon.ngrok.com/environment",success: function(data) {
@@ -106,7 +106,7 @@
 
           function displayGraph(id, width, height, interpolation, animate, updateDelay, transitionDelay) {
           // create an SVG element inside the #graph div that fills 100% of the div
-          var graph = d3.select(id).append("svg:svg").attr("width", "90%").attr("height", "100%");
+          var graph = d3.select(id).append("svg:svg").attr("width", "100%").attr("height", "100%");
 
           // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
           var data = [2.419465094, 3.509783816, 4.866273605, 7.514080373, 13.85301613, 11.83978281, 11.35747269, 11.29727392, 17.0112778, 17.27338236, 22.23792451, 34.659197, 27.34826239, 23.20665365, 19.91032865, 16.21121741, 10.04699836, 5.35810532, 3.289466522, 2.255147124, 1.737987424, 1.479407575, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.426872771, 1.411693273, 1.381334278, 1.320616288, 1.199180307, 0.956308346];
